@@ -1,0 +1,66 @@
+{% extends 'main/base.html' %}
+{% block title %}
+    User Profile
+{% endblock %}
+
+{% block content %}
+    {% if user.is_customer %}
+        <div style="display: ruby;">
+            <h1>{{ user.username }} ({{ user.user_age }} y/o)</h1>
+            <p>{{ user.email }}</p>
+            <p style="float: right;">Customer</p>
+        </div>
+    {% else %}
+        <div style="display: ruby;">
+            <h1>{{ user.username }}</h1>
+            <p> {{ user.email }}</p>
+            <p style="float: right;">{{user.company.field}} Company</p>
+        </div>
+       {% endif %}
+    {% if user.is_customer or not Visitor %}
+        <p class="title">Previous Requested Services</p>
+    {% else %}
+        <br><a href="/services/create/{{user.username}}">Add New Services</a>
+        <p class="title">Available Services</p>
+    {% endif %}
+
+    {% if user.is_customer %}
+        {% for service in services %}
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <a href="/services/{{service.service.id}}">{{service.service.name}}</a> ({{service.service.field}})
+            <p style="margin: 0; display: inline-block;"> ❱❱ {{service.price}}</p>
+            <p style="margin: 0; display: inline-block;"> ❱❱ {{ service.request_date }}</p>
+
+            <form action="" method="post" style="width: 5%;">
+                {% csrf_token %}
+                <button type="submit" value="{{ service.service_id }}" name="id" style="margin-top: 0;">
+                    <img src="/static/css/trash.png" width="30vw" alt="trash">
+                </button>
+            </form>
+
+            <p style="float: right; margin: 0; white-space: nowrap;">
+                by <a href="/company/{{service.service.company.user}}">{{service.service.company.user}}</a>
+            </p> 
+        </div>
+
+            <div class="line"></div>
+        {% endfor %}
+    {% else %}
+        {% for service in services %}
+        <div class="list_services_profile" style="display: flex; justify-content: space-between;">
+            <a href="/services/{{service.id}}">{{service.name}}</a>-- {{service.price_hour}}€/hour
+
+            {% if Visitor %}
+            <form action="" method="post" style="width: 5%;">
+                {% csrf_token %}
+                <button type="submit" value="{{ service.id }}" name="id" style="margin-top: 0;">
+                    <img src="/static/css/trash.png" width="30vw" alt="trash">
+                </button>
+            </form>
+            {% endif %}
+
+        </div>
+        <div class="line"></div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}
